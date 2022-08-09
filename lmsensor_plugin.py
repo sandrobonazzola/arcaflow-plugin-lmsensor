@@ -2,6 +2,7 @@
 
 import sys
 import typing
+import time
 from dataclasses import dataclass
 from arcaflow_plugin_sdk import plugin, validation
 
@@ -11,7 +12,8 @@ class InputParams:
     """
     This is the data structure for the input parameters of the step defined below.
     """
-    name: typing.Annotated[str, validation.min(1)]
+    iterations: typing.Annotated[int, validation.min(1)]
+    interval: typing.Annotated[int, validation.min(0)]
 
 
 @dataclass
@@ -30,30 +32,38 @@ class ErrorOutput:
     error: str
 
 
-# The following is a decorator (starting with @). We add this in front of our function to define the metadata for our
-# step.
 @plugin.step(
-    id="hello-world",
-    name="Hello world!",
-    description="Says hello :)",
+    id="lmsensor",
+    name="lmsensor plugin",
+    description="Run sensors",
     outputs={"success": SuccessOutput, "error": ErrorOutput},
 )
-def hello_world(params: InputParams) -> typing.Tuple[str, typing.Union[SuccessOutput, ErrorOutput]]:
+def run_sensors(params: InputParams) -> typing.Tuple[str, typing.Union[SuccessOutput, ErrorOutput]]:
     """
-    The function  is the implementation for the step. It needs the decorator above to make it into a  step. The type
-    hints for the params are required.
+    Run sensors for the given number of iterations with the given interval
+    in seconds.
 
     :param params:
 
-    :return: the string identifying which output it is, as well the output structure
+    :return: a json with the result
     """
+    final_result = ""
+    for current in range(InputParams.iterations):
+        result = subprocess.run(
+            ["/usr/bin/sensors", "-c"],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            return "error", ErrorOutput(result.stderr)
+        final_result += result.stdout
+        time.sleep(InputParams.interval)
 
-    return "success", SuccessOutput(
-        "Hello, {}!".format(params.name))
+    return "success", SuccessOutput(final_result)
 
 
 if __name__ == "__main__":
     sys.exit(plugin.run(plugin.build_schema(
         # List your step functions here:
-        hello_world,
+        run_sensors,
     )))

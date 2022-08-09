@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "iterations": {
+      "type": "integer",
+      "minimum": 1,
+      "title": "iterations"
+    },
+    "interval": {
+      "type": "integer",
+      "minimum": 0,
+      "title": "interval"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "iterations",
+    "interval"
+  ],
+  "title": "lmsensor plugin input",
+  "description": "Run sensors",
+  "$id": "lmsensor",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
