@@ -48,7 +48,7 @@ def run_sensors(params: InputParams) -> typing.Tuple[str, typing.Union[SuccessOu
     :return: a json with the result
     """
     final_result = ""
-    for current in range(InputParams.iterations):
+    for current in range(params.iterations):
         result = subprocess.run(
             ["/usr/bin/sensors", "-c"],
             capture_output=True,
@@ -57,7 +57,7 @@ def run_sensors(params: InputParams) -> typing.Tuple[str, typing.Union[SuccessOu
         if result.returncode != 0:
             return "error", ErrorOutput(result.stderr)
         final_result += result.stdout
-        time.sleep(InputParams.interval)
+        time.sleep(params.interval)
 
     return "success", SuccessOutput(final_result)
 
